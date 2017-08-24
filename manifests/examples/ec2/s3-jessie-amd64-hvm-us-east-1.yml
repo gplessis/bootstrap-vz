@@ -1,0 +1,63 @@
+---
+name: debian-{system.release}-{system.architecture}-{provider.virtualization}-{%Y}-{%m}-{%d}-{%H}{%M}-s3
+tags:
+  Name: "Jessie 8.9+1"
+  Debian: "8.9~{%Y}{%m}{%d}{%H}{%M}"
+provider:
+  name: ec2
+  virtualization: hvm
+  enhanced_networking: simple
+  # credentials:
+  #   access-key: AFAKEACCESSKEYFORAWS
+  #   secret-key: thes3cr3tkeyf0ryourawsaccount/FS4d8Qdva
+  #   certificate: /path/to/certificate
+  #   private-key: /path/to/private.key
+  #   user-id: your-aws-user-id
+  description: Debian {system.release} {system.architecture}
+  region: us-east-1
+  bucket: myamis-us-east-1
+bootstrapper:
+  workspace: /target
+system:
+  release: jessie
+  architecture: amd64
+  bootloader: grub
+  charmap: UTF-8
+  locale: en_US
+  timezone: UTC
+volume:
+  backing: s3
+  partitions:
+    type: msdos
+    root:
+      filesystem: ext4
+      size: 8GiB
+packages:
+  mirror: http://cloudfront.debian.net/debian
+  components:
+    - main
+    - contrib
+    - non-free
+  preferences:
+    backport-cloud-init-cloud-utils:
+      - package: cloud-init cloud-utils
+        pin: release n=jessie-backports
+        pin-priority: 500
+  install:
+    - awscli
+    - python-boto
+    - python3-boto
+    - apt-transport-https
+    - ncurses-term
+    - cloud-init
+    - cloud-utils
+    - systemd
+    - systemd-sysv
+plugins:
+  ntp: {}
+  cloud_init:
+    username: admin
+  unattended_upgrades:
+    update_interval: 1
+    download_interval: 1
+    upgrade_interval: 1
