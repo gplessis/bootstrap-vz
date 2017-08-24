@@ -31,18 +31,10 @@ def validate_manifest(data, validator, error):
 
     bootloader = data['system']['bootloader']
     virtualization = data['provider']['virtualization']
-    backing = data['volume']['backing']
-    partition_type = data['volume']['partitions']['type']
     enhanced_networking = data['provider']['enhanced_networking'] if 'enhanced_networking' in data['provider'] else None
 
     if virtualization == 'pvm' and bootloader != 'pvgrub':
         error('Paravirtualized AMIs only support pvgrub as a bootloader', ['system', 'bootloader'])
-
-    if backing != 'ebs' and virtualization == 'hvm':
-            error('HVM AMIs currently only work when they are EBS backed', ['volume', 'backing'])
-
-    if backing == 's3' and partition_type != 'none':
-            error('S3 backed AMIs currently only work with unpartitioned volumes', ['system', 'bootloader'])
 
     if enhanced_networking == 'simple' and virtualization != 'hvm':
             error('Enhanced networking only works with HVM virtualization', ['provider', 'virtualization'])
